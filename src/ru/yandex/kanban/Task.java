@@ -4,9 +4,15 @@ public class Task {
     protected String name;
     protected String description;
 
-    protected String status;
+    protected StatusOfTask status;
 
-    public Task(String name, String description, String status){
+    public enum StatusOfTask{
+        NEW,
+        IN_PROGRESS,
+        DONE
+    }
+
+    public Task(String name, String description, StatusOfTask status){
         this.name = name;
         this.description = description;
         this.status = status;
@@ -23,16 +29,16 @@ public class Task {
         return description;
     }
 
-    public String getStatus(){
+    public StatusOfTask getStatus(){
         return status;
     }
     public void setStatus(){
-        status = "NEW";
+        status = StatusOfTask.NEW;
 
     }
 
     @Override
     public String toString(){
-        return "name = " + getName() + ", description = " + getDescription() + ", status = " + getStatus();
+        return "\nname = " + getName() + ", description = " + getDescription() + ",\nstatus = " + getStatus();
     }
 }
