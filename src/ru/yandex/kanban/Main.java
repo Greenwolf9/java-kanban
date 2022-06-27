@@ -28,26 +28,28 @@ public class Main {
                 Task.StatusOfTask.DONE);
         manager.createNewTask(task);
         manager.createNewTask(task2);
-        manager.createNewTask(epic);
-        manager.createNewSubTask(subTask, epic.getListsOfSubTasks());
-        manager.createNewSubTask(subTask1, epic.getListsOfSubTasks());
-        manager.createNewTask(epic2);
-        manager.createNewSubTask(subTask1Epic2, epic2.getListsOfSubTasks());
+        manager.createNewEpic(epic);
+        manager.addNewSubTask(subTask, epic.getSubTaskIds());
+        manager.addNewSubTask(subTask1, epic.getSubTaskIds());
+        manager.createNewEpic(epic2);
+        manager.addNewSubTask(subTask1Epic2, epic2.getSubTaskIds());
+        manager.addNewSubTask(subTask, epic.getSubTaskIds());
+        manager.addNewSubTask(subTask1Epic2, epic2.getSubTaskIds());
+        manager.getListsOfSubTasks(epic);
         manager.getSubTask(epic);
-        manager.getTaskOrEpic(1);
-        manager.getTaskOrEpic(2);
-        manager.getTaskOrEpic(3);
+        manager.getTask(1);
+        manager.getEpic(3);
         manager.printListOfTasks();
         historyManager.addTask(task);
         historyManager.addTask(epic);
-        historyManager.addTask(epic2);
         historyManager.addTask(new Task("Задача 5", "Подробное описание", Task.StatusOfTask.NEW));
         historyManager.getHistory();
         manager.updateTask(task2, 1);
         manager.deleteTaskPerId(2);
         manager.printListOfTasks();
+        manager.printListOfEpicsAndSubTasks();
         manager.deleteAllTasks();
-        manager.printListOfTasks();
-        historyManager.getHistory();
+
+
     }
 }

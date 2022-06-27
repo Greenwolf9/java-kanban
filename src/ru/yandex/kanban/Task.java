@@ -32,10 +32,8 @@ public class Task {
     public StatusOfTask getStatus(){
         return status;
     }
-    public void setStatus(){
-        status = StatusOfTask.NEW;
 
-    }
+
 
     @Override
     public String toString(){
