@@ -3,53 +3,40 @@ package ru.yandex.kanban;
 public class Main {
 
     public static void main(String[] args) {
-        HistoryManager historyManager = Managers.getDefaultHistory();
-        TaskManager manager = Managers.getDefault(historyManager);
 
-        Task task = new Task("Задача 1",
-                "Подробное описание",
-                Task.StatusOfTask.NEW);
-        Task task2 = new Task("Задача 2",
-                "Подробное описание",
-                Task.StatusOfTask.NEW);
+        InMemoryTaskManager inMemoryTaskManager = new InMemoryTaskManager();
 
-        Epic epic = new Epic("Задача 3",
+
+        Epic epic = new Epic("Задача 1",
                 "подробное описание");
 
-        SubTask subTask = new SubTask(epic,"Подзадача 1 для задачи 3",
+        SubTask subTask = new SubTask(epic,"Подзадача 2 для задачи 1",
                 "Подробное описание",
                 Task.StatusOfTask.NEW);
-        SubTask subTask1 = new SubTask(epic,"Подзадача 2 для задачи 3",
+        SubTask subTask1 = new SubTask(epic,"Подзадача 3 для задачи 1",
                 "Подробное описание", Task.StatusOfTask.DONE);
+        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для задачи 1",
+                "Подробное описание", Task.StatusOfTask.NEW);
 
-        Epic epic2 = new Epic("Задача 4", "Подробное описание");
-        SubTask subTask1Epic2 = new SubTask(epic2, "Подзачада 1 для задачи 4",
-                "Подробное описание",
-                Task.StatusOfTask.DONE);
-        manager.createNewTask(task);
-        manager.createNewTask(task2);
-        manager.createNewEpic(epic);
-        manager.addNewSubTask(subTask, epic.getSubTaskIds());
-        manager.addNewSubTask(subTask1, epic.getSubTaskIds());
-        manager.createNewEpic(epic2);
-        manager.addNewSubTask(subTask1Epic2, epic2.getSubTaskIds());
-        manager.addNewSubTask(subTask, epic.getSubTaskIds());
-        manager.addNewSubTask(subTask1Epic2, epic2.getSubTaskIds());
-        manager.getListsOfSubTasks(epic);
-        manager.getSubTask(epic);
-        manager.getTask(1);
-        manager.getEpic(3);
-        manager.printListOfTasks();
-        historyManager.addTask(task);
-        historyManager.addTask(epic);
-        historyManager.addTask(new Task("Задача 5", "Подробное описание", Task.StatusOfTask.NEW));
-        historyManager.getHistory();
-        manager.updateTask(task2, 1);
-        manager.deleteTaskPerId(2);
-        manager.printListOfTasks();
-        manager.printListOfEpicsAndSubTasks();
-        manager.deleteAllTasks();
+        Epic epic2 = new Epic("Задача 5", "Подробное описание");
 
+        inMemoryTaskManager.createNewEpic(epic);
+        inMemoryTaskManager.addNewSubTask(subTask, epic.getSubTaskIds());
+        inMemoryTaskManager.addNewSubTask(subTask1, epic.getSubTaskIds());
+        inMemoryTaskManager.addNewSubTask(subTask2, epic.getSubTaskIds());
+        inMemoryTaskManager.createNewEpic(epic2);
+        inMemoryTaskManager.getSubTask(4);
+        inMemoryTaskManager.getSubTask(3);
+        inMemoryTaskManager.getEpic(1);
+        inMemoryTaskManager.getSubTask(2);
+        inMemoryTaskManager.getEpic(5);
+        inMemoryTaskManager.getSubTask(3);
+        inMemoryTaskManager.getSubTask(2);
+        inMemoryTaskManager.inMemoryHistoryManager.getHistory();
+        inMemoryTaskManager.deleteSubTaskPerId(4);
+        inMemoryTaskManager.inMemoryHistoryManager.getHistory();
+        inMemoryTaskManager.deleteEpicPerId(1);
+        inMemoryTaskManager.inMemoryHistoryManager.getHistory();
 
     }
 }

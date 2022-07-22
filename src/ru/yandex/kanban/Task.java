@@ -5,6 +5,7 @@ public class Task {
     protected String description;
 
     protected StatusOfTask status;
+    private int id;
 
     public enum StatusOfTask{
         NEW,
@@ -16,11 +17,18 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.id = id;
+
     }
     Task(){
 
     }
-
+    public int getId(){
+        return id;
+    }
+    public void setId(int id){
+        this.id = id;
+    }
     public String getName(){
         return name;
     }
