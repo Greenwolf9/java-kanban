@@ -1,4 +1,6 @@
-package ru.yandex.kanban;
+package ru.yandex.kanban.manager;
+
+import ru.yandex.kanban.tasks.Task;
 
 import java.util.*;
 import java.util.Collections;
@@ -45,9 +47,11 @@ public class InMemoryHistoryManager implements HistoryManager{
         historyOfTasks.add(node.data);
         }
         Collections.reverse(historyOfTasks);
-        System.out.println(historyOfTasks);
+        //System.out.println(historyOfTasks);
         return historyOfTasks;
     }
+
+
     @Override
     public void remove(int id){  // удаление задачи из просмотра по айди
         Node<Task> task = historyInNodes.get(id);

@@ -1,4 +1,8 @@
-package ru.yandex.kanban;
+package ru.yandex.kanban.manager;
+import ru.yandex.kanban.tasks.Epic;
+import ru.yandex.kanban.tasks.SubTask;
+import ru.yandex.kanban.tasks.Task;
+
 import java.util.List;
 
 public interface TaskManager {

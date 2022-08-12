@@ -1,18 +1,25 @@
-package ru.yandex.kanban;
+package ru.yandex.kanban.manager;
+import ru.yandex.kanban.tasks.Epic;
+import ru.yandex.kanban.tasks.SubTask;
+import ru.yandex.kanban.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int id = 0;
+    protected int id = 0;
 
-    private Map<Integer, Task> tasksPerId = new HashMap<>();
-    private Map<Integer, Epic> epicsPerId = new HashMap<>();
-    private Map<Integer, SubTask> subTasksPerId = new HashMap<>();
+    protected Map<Integer, Task> tasksPerId = new HashMap<>();
+    protected Map<Integer, Epic> epicsPerId = new HashMap<>();
+    protected Map<Integer, SubTask> subTasksPerId = new HashMap<>();
 
     InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
 
+    public InMemoryHistoryManager getInMemoryHistoryManager(){
+        return inMemoryHistoryManager;
+    }
     @Override
     public void createNewTask(Task task) {  //создание обычной задачи
         int id = generateId();
@@ -30,10 +37,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<SubTask> getListsOfSubTasks(Epic epic){ //создание списка подзадач
         List<SubTask> listsOfSubTasks = new ArrayList<>();
+
         for (int i = 0; i < epic.getSubTaskIds().size(); i++){
             int id = epic.getSubTaskIds().get(i);
             listsOfSubTasks.add(subTasksPerId.get(id));
-
         }
         return listsOfSubTasks;
 
@@ -63,7 +70,6 @@ public class InMemoryTaskManager implements TaskManager {
         } return epic.status;
     }
 
-
     @Override
     public void addNewSubTask(SubTask subTask, List<Integer> subTasksIds){ //создание списка подзадач
         int id = generateId();
@@ -71,6 +77,16 @@ public class InMemoryTaskManager implements TaskManager {
         subTasksIds.add(id);
         subTasksPerId.put(id, subTask);
         findStatusOfEpic(subTask.epic);
+    }
+
+    public Map<Integer, Task> getTasksPerId(){
+        return tasksPerId;
+    }
+    public Map<Integer, Epic> getEpicsPerId(){
+        return epicsPerId;
+    }
+    public Map<Integer, SubTask> getSubTasksPerId(){
+        return subTasksPerId;
     }
 
     @Override
@@ -99,7 +115,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id){          // получение таски
         Task task = tasksPerId.get(id);
-        System.out.println(task);
+        //System.out.println(task);
         inMemoryHistoryManager.addTask(task);
         return task;
     }
@@ -107,7 +123,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Epic getEpic(int id){          // получение эпика
         Epic epic = epicsPerId.get(id);
-        System.out.println(epic);
+        //System.out.println(epic);
         inMemoryHistoryManager.addTask(epic);
         return epic;
     }
@@ -115,7 +131,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override                               // получение сабтаски
     public SubTask getSubTask(int id){
         SubTask subTask = subTasksPerId.get(id);
-        System.out.println(subTask);
+        //System.out.println(subTask);
         inMemoryHistoryManager.addTask(subTask);
         return subTask;
     }
@@ -139,7 +155,6 @@ public class InMemoryTaskManager implements TaskManager {
             subTasksPerId.remove(i);
             inMemoryHistoryManager.remove(i);
         }
-
             epicsPerId.remove(id);
             inMemoryHistoryManager.remove(id);
         }

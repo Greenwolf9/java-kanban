@@ -1,4 +1,4 @@
-package ru.yandex.kanban;
+package ru.yandex.kanban.manager;
 
 public class Managers {
     public static TaskManager getDefault(HistoryManager historyManager){

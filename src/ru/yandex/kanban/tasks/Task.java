@@ -1,23 +1,31 @@
-package ru.yandex.kanban;
+package ru.yandex.kanban.tasks;
 
 public class Task {
     protected String name;
     protected String description;
 
-    protected StatusOfTask status;
-    private int id;
+    public StatusOfTask status;
+    protected int id;
+
+    protected TaskType type;
 
     public enum StatusOfTask{
         NEW,
         IN_PROGRESS,
         DONE
     }
+    public enum TaskType {
+        TASK,
+        EPIC,
+        SUBTASK;
+    }
 
-    public Task(String name, String description, StatusOfTask status){
+    public Task(String name, String description, StatusOfTask status, TaskType type){
         this.name = name;
         this.description = description;
         this.status = status;
-        this.id = id;
+        this.id = getId();
+        this.type = type;
 
     }
     Task(){
@@ -33,6 +41,7 @@ public class Task {
         return name;
     }
 
+
     public String getDescription(){
         return description;
     }
@@ -40,11 +49,15 @@ public class Task {
     public StatusOfTask getStatus(){
         return status;
     }
+    public TaskType getType(){
+        return type;
+    }
 
 
 
-    @Override
+
     public String toString(){
-        return "\nname = " + getName() + ", description = " + getDescription() + ",\nstatus = " + getStatus();
+        return "\nname = " + getName() + ", description = " + getDescription() + ",\nstatus = "
+                + getStatus() + ", type = " + getType() + ", id = " + getId();
     }
 }
