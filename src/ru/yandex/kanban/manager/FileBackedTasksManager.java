@@ -84,28 +84,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
     private static FileBackedTasksManager loadFromFile(File file){  // создаем задачи, запрашиваем их, записываем и считываем
         FileBackedTasksManager backedTasksManager = new FileBackedTasksManager();
-        Epic epic = new Epic("Эпик 1",
-                "подробное описание", Task.TaskType.EPIC);
-
-        SubTask subTask = new SubTask(epic,"Подзадача 3 для задачи 1",
-                "Подробное описание",
-                Task.StatusOfTask.NEW, Task.TaskType.SUBTASK);
-        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для задачи 1",
-                "Подробное описание",
-                Task.StatusOfTask.DONE, Task.TaskType.SUBTASK);
-        Task task = new Task("Задача 2", "подробное описание", Task.StatusOfTask.NEW, Task.TaskType.TASK);
-
-        backedTasksManager.createNewEpic(epic);
-        backedTasksManager.createNewTask(task);
-        backedTasksManager.addNewSubTask(subTask, epic.getSubTaskIds());
-        backedTasksManager.addNewSubTask(subTask2, epic.getSubTaskIds());
-        backedTasksManager.getTask(task.getId());
-        backedTasksManager.getEpic(epic.getId());
-        backedTasksManager.getSubTask(subTask.getId());
-        backedTasksManager.getSubTask(subTask2.getId());
-        backedTasksManager.getHistory();
-
-
         backedTasksManager.read(file);
         return backedTasksManager;
     }
@@ -163,9 +141,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
     }
 
     public static void main(String[] args) {
-        loadFromFile(new File("src/tasks.csv"));
 
-        //FileBackedTasksManager newOneFileBackedManager = new FileBackedTasksManager();
-        //newOneFileBackedManager.read(new File("src/tasks.csv"));
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager();
+        Epic epic = new Epic("Эпик 1",
+                "подробное описание", Task.TaskType.EPIC);
+
+        SubTask subTask = new SubTask(epic,"Подзадача 3 для задачи 1",
+                "Подробное описание",
+                Task.StatusOfTask.NEW, Task.TaskType.SUBTASK);
+        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для задачи 1",
+                "Подробное описание",
+                Task.StatusOfTask.DONE, Task.TaskType.SUBTASK);
+        Task task = new Task("Задача 2", "подробное описание", Task.StatusOfTask.NEW, Task.TaskType.TASK);
+
+        fileBackedTasksManager.createNewEpic(epic);
+        fileBackedTasksManager.createNewTask(task);
+        fileBackedTasksManager.addNewSubTask(subTask, epic.getSubTaskIds());
+        fileBackedTasksManager.addNewSubTask(subTask2, epic.getSubTaskIds());
+        fileBackedTasksManager.getTask(task.getId());
+        fileBackedTasksManager.getEpic(epic.getId());
+        fileBackedTasksManager.getSubTask(subTask.getId());
+        fileBackedTasksManager.getSubTask(subTask2.getId());
+
+
+        FileBackedTasksManager newOneFileBackedManager = loadFromFile(new File("src/tasks.csv"));
+        newOneFileBackedManager.getHistory();
     }
 }
