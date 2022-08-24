@@ -4,6 +4,8 @@ import ru.yandex.kanban.tasks.SubTask;
 import ru.yandex.kanban.tasks.Task;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 public interface TaskManager {
 
@@ -34,5 +36,12 @@ public interface TaskManager {
 
     SubTask getSubTask(int id);
 
+    Map<Integer, Task> getTasksPerId();
+    Map<Integer, Epic> getEpicsPerId();
+    Map<Integer, SubTask> getSubTasksPerId();
+
+    void findStartTimeAndDurationOfEpic(Epic epic);
+    TreeSet<Task> getPrioritizedTasks();
+    void checkOverlappingTasks(Task task) throws InMemoryTaskManager.TaskOverlappingException;
 }
 

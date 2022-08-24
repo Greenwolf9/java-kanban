@@ -3,11 +3,15 @@ import ru.yandex.kanban.files.CsvFileFormatter;
 import ru.yandex.kanban.tasks.Epic;
 import ru.yandex.kanban.tasks.SubTask;
 import ru.yandex.kanban.tasks.Task;
+import java.io.IOException;
 
 import java.io.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager{
@@ -54,6 +58,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
     }
 
     public List<Task> getHistory(){
+
         return super.inMemoryHistoryManager.getHistory();
     }
 
@@ -66,29 +71,35 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
                 writer.write(CsvFileFormatter.toString(task) + System.lineSeparator());
             }
             for(Epic epic: getEpicsPerId().values()){
-                writer.write(CsvFileFormatter.toString(epic) + System.lineSeparator());
+                writer.write(CsvFileFormatter.epicToString(epic) + System.lineSeparator());
             }
             for(SubTask subTask: getSubTasksPerId().values()){
                 writer.write(CsvFileFormatter.subTaskToString(subTask) + System.lineSeparator());
+
             }
             writer.write(System.lineSeparator());
-            if (!CsvFileFormatter.historyToString(getInMemoryHistoryManager()).isEmpty()){
-            writer.write(CsvFileFormatter.historyToString(getInMemoryHistoryManager()));}
+            if (CsvFileFormatter.historyToString(getInMemoryHistoryManager())==null){
+                throw new ManagerSaveException("Упс. Что-то пошло не так при записи файла.");
+            } else{
+            writer.write(CsvFileFormatter.historyToString(getInMemoryHistoryManager()));
+            }
 
-            if(!file.toFile().exists()){
-            throw new ManagerSaveException("Упс. Что-то пошло не так при записи файла.");}
         } catch(ManagerSaveException | IOException exception) {
             exception.getMessage();
         }
     }
 
-    private static FileBackedTasksManager loadFromFile(File file){  // создаем задачи, запрашиваем их, записываем и считываем
+    public static FileBackedTasksManager loadFromFile(File file) {  // создаем задачи, запрашиваем их, записываем и считываем
         FileBackedTasksManager backedTasksManager = new FileBackedTasksManager();
-        backedTasksManager.read(file);
+        try{
+        backedTasksManager.read(file);}
+        catch (IOException exception){
+            exception.getMessage();
+        }
         return backedTasksManager;
     }
 
-    private void read(File file){  // считываем файл
+    protected void read(File file) throws IOException{  // считываем файл
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             boolean firstLine = true;
@@ -99,20 +110,27 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
                     continue;
                 } else {
                     if (!lines.isBlank()) {
-                        if (CsvFileFormatter.fromString(lines).getType() == Task.TaskType.TASK) {
+
+                        if (CsvFileFormatter.fromString(lines).getType().equals(Task.TaskType.TASK)) {
                             Task task = CsvFileFormatter.fromString(lines);
                             tasksPerId.put(task.getId(), task);
-                        } else if (CsvFileFormatter.epicFromString(lines).getType() == Task.TaskType.EPIC) {
-                            Epic epic = CsvFileFormatter.epicFromString(lines);
+                        } else if (CsvFileFormatter.fromString(lines).getType().equals(Task.TaskType.EPIC)) {
+
+                            Epic epic = (Epic)CsvFileFormatter.fromString(lines);
                             epicsPerId.put(epic.getId(), epic);
-                        } else if (CsvFileFormatter.subTaskFromString(lines).getType() == Task.TaskType.SUBTASK) {
-                            SubTask subTask = CsvFileFormatter.subTaskFromString(lines);
+                        } else if (CsvFileFormatter.fromString(lines).getType().equals(Task.TaskType.SUBTASK)) {
+                            SubTask subTask = (SubTask) CsvFileFormatter.fromString(lines);
                             subTasksPerId.put(subTask.getId(), subTask);
                             Epic epic = epicsPerId.get(subTask.epic.getId());
                             epic.getSubTaskIds().add(subTask.getId());
+                            findStartTimeAndDurationOfEpic(epic);
+
                         }
                     } else {
                         String line = br.readLine();
+                        if(line==null){
+                            throw new ManagerSaveException("История не заполнена.");
+                        }
                         StringBuilder sb = new StringBuilder(line);
                         sb.reverse();
                         String newLine = sb.toString();
@@ -128,13 +146,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
                     }
                 }
             }
-        } catch (IOException exception){
-            System.out.println("Упс. Что-то пошло не так при чтении файла." + exception.getMessage());
+        } catch (ManagerSaveException | IOException exception){
+            System.out.println("Упс. Что-то пошло не так при чтении файла. " + exception.getMessage());
         }
         System.out.println(getHistory());
     }
 
-    class ManagerSaveException extends Exception {
+    public class ManagerSaveException extends Exception {
         public ManagerSaveException(final String message) {
             super(message);
         }
@@ -146,24 +164,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         Epic epic = new Epic("Эпик 1",
                 "подробное описание", Task.TaskType.EPIC);
 
-        SubTask subTask = new SubTask(epic,"Подзадача 3 для задачи 1",
+       SubTask subTask = new SubTask(epic,"Подзадача 3 для эпика 1",
+                "Подробное описание", Task.StatusOfTask.NEW, Task.TaskType.SUBTASK,
+               LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 12)), 40);
+        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для эпика 1",
                 "Подробное описание",
-                Task.StatusOfTask.NEW, Task.TaskType.SUBTASK);
-        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для задачи 1",
-                "Подробное описание",
-                Task.StatusOfTask.DONE, Task.TaskType.SUBTASK);
-        Task task = new Task("Задача 2", "подробное описание", Task.StatusOfTask.NEW, Task.TaskType.TASK);
+                Task.StatusOfTask.DONE, Task.TaskType.SUBTASK,
+                LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 20)), 40);
+        Task task = new Task("Задача 2", "подробное описание", Task.StatusOfTask.NEW,
+                Task.TaskType.TASK, LocalDateTime.now(), 60);
 
         fileBackedTasksManager.createNewEpic(epic);
         fileBackedTasksManager.createNewTask(task);
         fileBackedTasksManager.addNewSubTask(subTask, epic.getSubTaskIds());
         fileBackedTasksManager.addNewSubTask(subTask2, epic.getSubTaskIds());
-        fileBackedTasksManager.getTask(task.getId());
         fileBackedTasksManager.getEpic(epic.getId());
+        fileBackedTasksManager.getTask(task.getId());
         fileBackedTasksManager.getSubTask(subTask.getId());
         fileBackedTasksManager.getSubTask(subTask2.getId());
-
-
         FileBackedTasksManager newOneFileBackedManager = loadFromFile(new File("src/tasks.csv"));
         newOneFileBackedManager.getHistory();
     }

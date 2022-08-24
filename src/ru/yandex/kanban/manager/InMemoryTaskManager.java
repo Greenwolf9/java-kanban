@@ -3,10 +3,8 @@ import ru.yandex.kanban.tasks.Epic;
 import ru.yandex.kanban.tasks.SubTask;
 import ru.yandex.kanban.tasks.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
     protected int id = 0;
@@ -14,6 +12,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Task> tasksPerId = new HashMap<>();
     protected Map<Integer, Epic> epicsPerId = new HashMap<>();
     protected Map<Integer, SubTask> subTasksPerId = new HashMap<>();
+    protected TreeSet<Task> prioritizedTasks =  new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     InMemoryHistoryManager inMemoryHistoryManager = new InMemoryHistoryManager();
 
@@ -25,6 +24,14 @@ public class InMemoryTaskManager implements TaskManager {
         int id = generateId();
         task.setId(id);
         tasksPerId.put(id, task);
+
+        try {
+            checkOverlappingTasks(task);
+        } catch (TaskOverlappingException e){
+            System.err.println(e.getMessage());
+            return;
+        }
+        prioritizedTasks.add(task);
     }
     @Override
     public void createNewEpic(Epic epic){  //создание эпика
@@ -32,6 +39,8 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setId(id);
         epicsPerId.put(id, epic);
         findStatusOfEpic(epic);
+        findStartTimeAndDurationOfEpic(epic);
+
         }
 
     @Override
@@ -77,8 +86,21 @@ public class InMemoryTaskManager implements TaskManager {
         subTasksIds.add(id);
         subTasksPerId.put(id, subTask);
         findStatusOfEpic(subTask.epic);
-    }
+        findStartTimeAndDurationOfEpic(subTask.epic);
 
+        try {
+            checkOverlappingTasks(subTask);
+        } catch (TaskOverlappingException e){
+            System.err.println(e.getMessage());
+            return;
+        }
+        prioritizedTasks.add(subTask);
+    }
+    @Override
+    public TreeSet<Task> getPrioritizedTasks(){
+
+        return prioritizedTasks;
+    }
     public Map<Integer, Task> getTasksPerId(){
         return tasksPerId;
     }
@@ -187,6 +209,57 @@ public class InMemoryTaskManager implements TaskManager {
             epicsPerId.put(id, (Epic) task);
         }else{
             subTasksPerId.put(id, (SubTask) task);
+        }
+    }
+    @Override
+    public void findStartTimeAndDurationOfEpic(Epic epic){
+        List<Integer> subTaskIds = epic.getSubTaskIds();
+
+        if(subTaskIds.isEmpty()){
+            epic.setDuration(0L);
+        }
+
+        LocalDateTime startOfEpic = LocalDateTime.MIN;
+        LocalDateTime endTimeOfEpic = LocalDateTime.MAX;
+        long durationOfEpic = 0L;
+
+        for(int id: subTaskIds){
+            SubTask subTask = subTasksPerId.get(id);
+            if(subTask.getStartTime().isBefore(endTimeOfEpic)){
+                startOfEpic = subTask.getStartTime();
+            }
+            if(subTask.getEndTime().isAfter(startOfEpic)){
+                endTimeOfEpic = subTask.getEndTime();
+            }
+            durationOfEpic += subTask.getDuration();
+        }
+        epic.setStartTime(startOfEpic);
+        epic.setEndTime(endTimeOfEpic);
+        epic.setDuration(durationOfEpic);
+
+    }
+    @Override
+    public void checkOverlappingTasks(Task task) throws TaskOverlappingException{
+        LocalDateTime startOfTask = task.getStartTime();
+        LocalDateTime endOfTask = task.getEndTime();
+        List<Task> allTasks = new ArrayList<>(getPrioritizedTasks());
+        if(!allTasks.isEmpty()){
+        for(Task t: allTasks) {
+            LocalDateTime startTime = t.getStartTime();
+            LocalDateTime endTime = t.getEndTime();
+            if ((startOfTask.isBefore(startTime) && endOfTask.isBefore(startTime)) || (startOfTask.isAfter(endTime) && endOfTask.isAfter(endTime))){
+                continue;
+            } else {
+                throw new TaskOverlappingException("Нельзя выполнять несколько задач одновременно. " +
+                        "Выполнение задачи " + task.getName() + " необходимо перенести на другое время.");
+            }
+            }
+        }
+    }
+
+    public class TaskOverlappingException extends Exception {
+        public TaskOverlappingException(final String message) {
+            super(message);
         }
     }
 }

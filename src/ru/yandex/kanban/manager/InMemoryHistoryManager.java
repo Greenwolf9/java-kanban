@@ -1,6 +1,6 @@
 package ru.yandex.kanban.manager;
 
-import ru.yandex.kanban.tasks.Task;
+import ru.yandex.kanban.tasks.*;
 
 import java.util.*;
 import java.util.Collections;
@@ -31,6 +31,7 @@ public class InMemoryHistoryManager implements HistoryManager{
     }
     @Override
     public void addTask(Task task){  // добавление задачи в связный список
+
         if (task == null){
             return;
         }
