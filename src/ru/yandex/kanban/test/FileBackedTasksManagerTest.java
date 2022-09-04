@@ -31,18 +31,13 @@ class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>
         FileBackedTasksManager newOneFileBackedManager1 = FileBackedTasksManager.loadFromFile(new File("src/tasks.csv"));
         List<Task> listOfTasks = newOneFileBackedManager1.getHistory();
         assertFalse(listOfTasks.isEmpty());
-        assertEquals(1, listOfTasks.size(), "Wrong quantity of tasks");
+        assertEquals(3, listOfTasks.size(), "Wrong quantity of tasks");
         Task taskForTest = listOfTasks.get(0);
         final int id = taskForTest.getId();
         assertEquals(task.getId(), id, "ID's of tasks are not equal");
     }
 
-    @Test
-    public void shouldLoadFromFileWithoutHistory(){
-        FileBackedTasksManager newOneFileBackedManager1 = FileBackedTasksManager.loadFromFile(new File("src/tasks.csv"));
-        assertTrue(newOneFileBackedManager1.getHistory().isEmpty());
-        assertEquals(0, newOneFileBackedManager1.getHistory().size(), "history is empty");
-    }
+
 
 
 }

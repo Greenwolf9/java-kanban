@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class TaskManagerTest <T extends TaskManager> {
     protected T taskManager;
-    private Task task;
-    private Epic epic;
-    private SubTask subTask;
-    private SubTask subTask2;
+    protected Task task;
+    protected Epic epic;
+    protected SubTask subTask;
+    protected SubTask subTask2;
 
 
     public void createTasksForTest(){
@@ -31,10 +31,10 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         epic = new Epic("Эпик 1",
                 "подробное описание", Task.TaskType.EPIC);
 
-        subTask = new SubTask(epic,"Подзадача 3 для эпика 1",
+        subTask = new SubTask(1,"Подзадача 3 для эпика 1",
                 "Подробное описание", Task.StatusOfTask.NEW, Task.TaskType.SUBTASK,
-                LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 12)), 40);
-        subTask2 = new SubTask(epic,"Подзадача 4 для эпика 1",
+                LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 12)), 40);
+        subTask2 = new SubTask(1,"Подзадача 4 для эпика 1",
                 "Подробное описание",
                 Task.StatusOfTask.DONE, Task.TaskType.SUBTASK,
                 LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 20)), 40);
@@ -45,6 +45,9 @@ public abstract class TaskManagerTest <T extends TaskManager> {
         taskManager.createNewTask(task);
         taskManager.addNewSubTask(subTask, epic.getSubTaskIds());
         taskManager.addNewSubTask(subTask2, epic.getSubTaskIds());
+        taskManager.getTask(task.getId());
+        taskManager.getEpic(epic.getId());
+        taskManager.getSubTask(subTask.getId());
 
 
     }
@@ -87,7 +90,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     void getListsOfSubTasks() {
-        List<SubTask> listsOfSubTasks = taskManager.getListsOfSubTasks(epic);
+        List<SubTask> listsOfSubTasks = taskManager.getListsOfSubTasks(epic.getId());
         assertFalse(listsOfSubTasks.isEmpty());
         assertEquals(2, listsOfSubTasks.size(), "Wrong list of subtasks");
     }
@@ -128,7 +131,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
     }
     @Test
     void shouldFindStartTimeAndDurationOfEpic(){
-        SubTask subTaskForTest = new SubTask(epic, "Подзадача 5 для эпика 1", "Подробное описание",
+        SubTask subTaskForTest = new SubTask(1, "Подзадача 5 для эпика 1", "Подробное описание",
                 Task.StatusOfTask.NEW, Task.TaskType.SUBTASK,
                 LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 20)), 20);
 
@@ -232,6 +235,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
     @Test
     void shouldReturnEpicPerId() {
         Map<Integer, Epic> epics = taskManager.getEpicsPerId();
+        assertEquals(1,epics.size(), "Map is empty");
         Epic epicForComparison = epics.get(epic.getId());
         assertNotNull(epicForComparison);
         assertEquals(epic, epicForComparison, "Epics are not equal");
@@ -240,9 +244,18 @@ public abstract class TaskManagerTest <T extends TaskManager> {
     @Test
     void shouldReturnSubTaskPerId() {
         Map<Integer, SubTask> subtasks = taskManager.getSubTasksPerId();
+        assertEquals(2, subtasks.size(), "Map is empty");
         SubTask subTaskForComparison = subtasks.get(subTask.getId());
         assertNotNull(subTaskForComparison);
         assertEquals(subTask, subTaskForComparison, "SubTasks are not equal");
+    }
+
+    @Test
+    void shouldReturnAllTasks(){
+        Map<Integer, Task> allTasks = taskManager.getAllTasks();
+        assertNotNull(allTasks);
+        assertEquals(4, allTasks.size(), "The quantity of created tasks is wrong");
+
     }
 
 
@@ -270,10 +283,11 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     public void shouldCheckIfSubTaskKnowAboutItsEpic(){
+
         Map<Integer, SubTask> subtasks = taskManager.getSubTasksPerId();
-        Epic epicForTest = subtasks.get(subTask.getId()).epic;
-        assertNotNull(epicForTest);
-        assertEquals(epic.getId(), epicForTest.getId());
+        final int epicIdForTest = subtasks.get(subTask.getId()).getEpicId();
+        assertNotNull(epicIdForTest);
+        assertEquals(subTask.getEpicId(), epicIdForTest);
 
     }
 
@@ -286,7 +300,7 @@ public abstract class TaskManagerTest <T extends TaskManager> {
 
     @Test
     public void shouldCheckOverlappingTasks() {
-        SubTask subTaskForTest = new SubTask(epic,"Подзадача 5 для эпика 1",
+        SubTask subTaskForTest = new SubTask(1,"Подзадача 5 для эпика 1",
                 "Подробное описание", Task.StatusOfTask.NEW, Task.TaskType.SUBTASK,
                 LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 32)), 40);
 

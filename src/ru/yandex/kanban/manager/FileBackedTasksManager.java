@@ -59,10 +59,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
     public List<Task> getHistory(){
 
-        return super.inMemoryHistoryManager.getHistory();
+        return inMemoryHistoryManager.getHistory();
     }
 
-    private void save() {                                           // сохраняем в файл
+    protected void save() {                                           // сохраняем в файл
         try (FileWriter writer = new FileWriter(file.toFile())){
             String firstLine = "id, type, name, status, description, epic\n";
             writer.write(firstLine);
@@ -78,7 +78,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
 
             }
             writer.write(System.lineSeparator());
-            if (CsvFileFormatter.historyToString(getInMemoryHistoryManager())==null){
+            if (CsvFileFormatter.historyToString(getInMemoryHistoryManager()).equals("")){
                 throw new ManagerSaveException("Упс. Что-то пошло не так при записи файла.");
             } else{
             writer.write(CsvFileFormatter.historyToString(getInMemoryHistoryManager()));
@@ -121,7 +121,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
                         } else if (CsvFileFormatter.fromString(lines).getType().equals(Task.TaskType.SUBTASK)) {
                             SubTask subTask = (SubTask) CsvFileFormatter.fromString(lines);
                             subTasksPerId.put(subTask.getId(), subTask);
-                            Epic epic = epicsPerId.get(subTask.epic.getId());
+
+                            Epic epic = epicsPerId.get(subTask.getEpicId());
+                            subTask.setEpicId(epic.getId());
                             epic.getSubTaskIds().add(subTask.getId());
                             findStartTimeAndDurationOfEpic(epic);
 
@@ -164,10 +166,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         Epic epic = new Epic("Эпик 1",
                 "подробное описание", Task.TaskType.EPIC);
 
-       SubTask subTask = new SubTask(epic,"Подзадача 3 для эпика 1",
+       SubTask subTask = new SubTask(1,"Подзадача 3 для эпика 1",
                 "Подробное описание", Task.StatusOfTask.NEW, Task.TaskType.SUBTASK,
                LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 12)), 40);
-        SubTask subTask2 = new SubTask(epic,"Подзадача 4 для эпика 1",
+        SubTask subTask2 = new SubTask(1,"Подзадача 4 для эпика 1",
                 "Подробное описание",
                 Task.StatusOfTask.DONE, Task.TaskType.SUBTASK,
                 LocalDateTime.of(LocalDate.now(), LocalTime.of(15, 20)), 40);
@@ -180,8 +182,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager{
         fileBackedTasksManager.addNewSubTask(subTask2, epic.getSubTaskIds());
         fileBackedTasksManager.getEpic(epic.getId());
         fileBackedTasksManager.getTask(task.getId());
-        fileBackedTasksManager.getSubTask(subTask.getId());
         fileBackedTasksManager.getSubTask(subTask2.getId());
+        fileBackedTasksManager.getSubTask(subTask.getId());
+
         FileBackedTasksManager newOneFileBackedManager = loadFromFile(new File("src/tasks.csv"));
         newOneFileBackedManager.getHistory();
     }

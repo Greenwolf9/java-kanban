@@ -44,7 +44,8 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
     @Override
-    public List<SubTask> getListsOfSubTasks(Epic epic){ //создание списка подзадач
+    public List<SubTask> getListsOfSubTasks(int epicId){ //создание списка подзадач
+        Epic epic = epicsPerId.get(epicId);
         List<SubTask> listsOfSubTasks = new ArrayList<>();
 
         for (int i = 0; i < epic.getSubTaskIds().size(); i++){
@@ -56,7 +57,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
     @Override
     public Task.StatusOfTask findStatusOfEpic(Epic epic){  // вычисление статуса эпика
-        List<SubTask> listsOfSubTasks = getListsOfSubTasks(epic);
+        List<SubTask> listsOfSubTasks = getListsOfSubTasks(epic.getId());
         int countNew = 0;
         int countDone = 0;
         if (!listsOfSubTasks.isEmpty()) {
@@ -85,8 +86,9 @@ public class InMemoryTaskManager implements TaskManager {
         subTask.setId(id);
         subTasksIds.add(id);
         subTasksPerId.put(id, subTask);
-        findStatusOfEpic(subTask.epic);
-        findStartTimeAndDurationOfEpic(subTask.epic);
+        Epic epic = epicsPerId.get(subTask.getEpicId());
+        findStatusOfEpic(epic);
+        findStartTimeAndDurationOfEpic(epic);
 
         try {
             checkOverlappingTasks(subTask);
@@ -98,7 +100,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
     @Override
     public TreeSet<Task> getPrioritizedTasks(){
-
         return prioritizedTasks;
     }
     public Map<Integer, Task> getTasksPerId(){
@@ -109,6 +110,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
     public Map<Integer, SubTask> getSubTasksPerId(){
         return subTasksPerId;
+    }
+
+    public Map<Integer, Task> getAllTasks(){
+        Map<Integer, Task> allTasks = new HashMap<>();
+        allTasks.putAll(tasksPerId);
+        allTasks.putAll(epicsPerId);
+        allTasks.putAll(subTasksPerId);
+        return allTasks;
     }
 
     @Override
@@ -127,8 +136,8 @@ public class InMemoryTaskManager implements TaskManager {
     public void printListOfEpicsAndSubTasks(){  // печать эпиков и сабтасков
         for(Epic epic: epicsPerId.values()){
             System.out.println(epic);
-            for (int i = 0; i < getListsOfSubTasks(epic).size(); i++){
-                SubTask subTask = getListsOfSubTasks(epic).get(i);
+            for (int i = 0; i < getListsOfSubTasks(epic.getId()).size(); i++){
+                SubTask subTask = getListsOfSubTasks(epic.getId()).get(i);
                 System.out.println(subTask);
             }
         }
@@ -237,6 +246,10 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setEndTime(endTimeOfEpic);
         epic.setDuration(durationOfEpic);
 
+    }
+    @Override
+    public List<Task> getHistory(){
+        return inMemoryHistoryManager.getHistory();
     }
     @Override
     public void checkOverlappingTasks(Task task) throws TaskOverlappingException{

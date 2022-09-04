@@ -50,7 +50,7 @@ public class CsvFileFormatter {
                 subTask.getName() + "," +
                 subTask.getStatus() + "," +
                 subTask.getDescription() + "," +
-                subTask.epic.getId() + "," +
+                subTask.getEpicId() + "," +
                 subTask.getStartTime().format(formatter) + "," + subTask.getDuration();
 
     }
@@ -77,7 +77,7 @@ public class CsvFileFormatter {
         } else {
             input.append(list[6] +","+list[7]);
             int id = Integer.parseInt(list[0]);
-            SubTask subTask = new SubTask(new Epic(Integer.parseInt(list[5])),
+            SubTask subTask = new SubTask(Integer.parseInt(list[5]),
                     list[2],
                     list[4],
                     Task.StatusOfTask.valueOf(list[3]),
@@ -85,6 +85,7 @@ public class CsvFileFormatter {
                     LocalDateTime.parse(input, formatter),
                     Integer.parseInt(list[8]));
             subTask.setId(id);
+            subTask.setEpicId(Integer.parseInt(list[5]));
             subTask.setStartTime(LocalDateTime.parse(input, formatter));
             subTask.setDuration(Integer.parseInt(list[8]));
 

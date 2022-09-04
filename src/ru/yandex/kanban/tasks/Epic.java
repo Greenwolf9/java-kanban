@@ -7,7 +7,7 @@ import java.util.List;
 public class Epic extends Task{
 
     protected List<Integer> subTaskIds;
-    protected int id;
+
     protected LocalDateTime endTime;
 
     public Epic(String name, String description, TaskType type){
@@ -21,19 +21,10 @@ public class Epic extends Task{
         this.endTime = getEndTime();
         this.duration = getDuration();
     }
-    public Epic(int epicId){
-        this.id = epicId;
-    }
 
 
-    public int getId(){
-        return id;
-    }
 
 
-    public void setId(int id){
-        this.id = id;
-    }
     public List<Integer> getSubTaskIds(){
         return subTaskIds;
     }

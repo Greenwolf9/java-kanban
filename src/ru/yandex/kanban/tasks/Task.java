@@ -103,7 +103,7 @@ public class Task {
     }
 
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
+    transient DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
 
     @Override
     public boolean equals(Object o) {

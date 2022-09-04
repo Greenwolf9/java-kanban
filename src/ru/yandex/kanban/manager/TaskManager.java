@@ -14,12 +14,13 @@ public interface TaskManager {
 
     void addNewSubTask(SubTask subTask, List<Integer> subTasksIds);
 
-    List<SubTask> getListsOfSubTasks(Epic epic);
+    List<SubTask> getListsOfSubTasks(int epicId);
     Task.StatusOfTask findStatusOfEpic(Epic epic);
 
     int generateId();
 
     void printListOfTasks();
+    Map<Integer, Task> getAllTasks();
 
     void deleteTaskPerId(int id);
     void deleteSubTaskPerId(int id);
@@ -43,5 +44,7 @@ public interface TaskManager {
     void findStartTimeAndDurationOfEpic(Epic epic);
     TreeSet<Task> getPrioritizedTasks();
     void checkOverlappingTasks(Task task) throws InMemoryTaskManager.TaskOverlappingException;
+
+    List<Task> getHistory();
 }
 
